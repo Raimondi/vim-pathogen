@@ -305,15 +305,18 @@ function! s:plugin(action, ...) " {{{1
     if a:0 == 0 || (a:0 == 1 && a:1 ==? 'all')
       " List all plugins:
       echom 'All plugins:'
-      let list = pathogen#list_plugins(0)
+      "let list = pathogen#list_plugins(0)
+      let list = map(pathogen#list_plugins(0), '(pathogen#is_disabled_plugin(v:val) ? ''[-] '' : ''[+] '') . v:val')
     elseif a:0 == 1 && a:1 ==? 'enabled'
       " List enabled plugins:
       echom 'Enabled plugins:'
-      let list = pathogen#list_plugins(1)
+      "let list = pathogen#list_plugins(1)
+      let list = map(pathogen#list_plugins(1), '(pathogen#is_disabled_plugin(v:val) ? ''[-] '' : ''[+] '') . v:val')
     elseif a:0 == 1 && a:1 ==? 'disabled'
       " List disabled plugins:
       echom 'Disabled plugins:'
-      let list = pathogen#list_plugins(-1)
+      "let list = pathogen#list_plugins(-1)
+      let list = map(pathogen#list_plugins(-1), '(pathogen#is_disabled_plugin(v:val) ? ''[-] '' : ''[+] '') . v:val')
     else
       echom 'Too many arguments.'
       return ''
