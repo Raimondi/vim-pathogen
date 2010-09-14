@@ -331,16 +331,16 @@ endfunction " }}}1
 
 " Provides completion for :Plugin
 function! s:Command_complete(ArgLead, CmdLine, CursorPos) " {{{1
-  if a:CmdLine[: a:CursorPos ] =~? '\m^\s*\S\+ \S*$'
+  if a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ \S*$'
     " Complete actions:
     return join(['enable', 'disable', 'list'], "\n")
-  elseif a:CmdLine[: a:CursorPos ] =~? '^\m\s*\S\+ e\S* \S*$'
+  elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ e\S* \S*$'
     " Complete enable action, list disabled plugins:
     return join(map(pathogen#list_plugins(-1), 'substitute(v:val, ''^.*''.pathogen#separator().''\(.\{-}\)$'',''\1'',"")'), "\n")
-  elseif a:CmdLine[: a:CursorPos ] =~? '^\m\s*\S\+ d\S* \S*$'
+  elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ d\S* \S*$'
     " Complete disable action, list enabled plugins:
     return join(map(pathogen#list_plugins(1), 'substitute(v:val, ''^.*''.pathogen#separator().''\(.\{-}\)$'',''\1'',"")'), "\n")
-  elseif a:CmdLine[: a:CursorPos ] =~? '^\m\s*\S\+ l\S* \S*$'
+  elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ l\S* \S*$'
     " Complete list action, list options:
     return join(['all', 'enabled', 'disabled'], "\n")
   endif
