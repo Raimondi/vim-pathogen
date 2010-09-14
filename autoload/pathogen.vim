@@ -304,19 +304,16 @@ function! s:plugin(action, ...) " {{{1
   elseif a:action ==? actions[2]
     if a:0 == 0 || (a:0 == 1 && a:1 ==? 'all')
       " List all plugins:
-      echom 'All plugins:'
-      "let list = pathogen#list_plugins(0)
-      let list = map(pathogen#list_plugins(0), '(pathogen#is_disabled_plugin(v:val) ? ''[-] '' : ''[+] '') . v:val')
+      echom 'All plugins managed by pathogen:'
+      let list = s:plugin_list(0)
     elseif a:0 == 1 && a:1 ==? 'enabled'
       " List enabled plugins:
-      echom 'Enabled plugins:'
-      "let list = pathogen#list_plugins(1)
-      let list = map(pathogen#list_plugins(1), '(pathogen#is_disabled_plugin(v:val) ? ''[-] '' : ''[+] '') . v:val')
+      echom 'Enabled plugins managed by pathogen:'
+      let list = s:plugin_list(1)
     elseif a:0 == 1 && a:1 ==? 'disabled'
       " List disabled plugins:
-      echom 'Disabled plugins:'
-      "let list = pathogen#list_plugins(-1)
-      let list = map(pathogen#list_plugins(-1), '(pathogen#is_disabled_plugin(v:val) ? ''[-] '' : ''[+] '') . v:val')
+      echom 'Disabled plugins managed by pathogen:'
+      let list = s:plugin_list(-1)
     else
       echom 'Too many arguments.'
       return ''
@@ -328,6 +325,15 @@ function! s:plugin(action, ...) " {{{1
     echom 'Action not supported: ' . a:action
   endif
 endfunction " }}}1
+
+" Format output for :Plugin list.
+function! s:plugin_list(opt) " {{{1
+  let enbldMrk = '[ + ]'
+  let dsbldMrk = '[ - ]'
+
+  return map(pathogen#list_plugins(a:opt), '(pathogen#is_disabled_plugin(v:val) ? dsbldMrk : enbldMrk) . '' '' . v:val')
+endfunction " }}}1
+
 
 " Provides completion for :Plugin
 function! s:Command_complete(ArgLead, CmdLine, CursorPos) " {{{1
