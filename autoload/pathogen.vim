@@ -279,7 +279,7 @@ function! pathogen#helptags() " {{{1
   endfor
 endfunction " }}}1
 
-" Enable/disable plugins:
+" :Plugin complement:
 function! s:plugin(action, ...) " {{{1
   let actions = ['enable', 'disable', 'list']
   if  index(actions, a:action, 0, 1) == -1
