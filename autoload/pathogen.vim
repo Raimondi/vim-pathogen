@@ -282,26 +282,27 @@ endfunction " }}}1
 " :Plugin complement:
 function! s:plugin(action, ...) " {{{1
   let actions = ['enable', 'disable', 'list']
-  if  index(actions, a:action, 0, 1) == -1
+  "if  index(actions, a:action, 0, 1) == -1
+  if len(filter(copy(actions), 'v:val =~? ''^''.a:action')) == 0
     echom 'Action not supported.'
     return ''
   endif
 
-  if a:action ==? actions[0]
+  if actions[0] =~? '^'.a:action
     if a:0 == 1
       " Enable plugin:
       call pathogen#enable_plugin(a:1)
     else
       echom 'Too many arguments.'
     endif
-  elseif a:action ==? actions[1] && a:0 == 1
+  elseif actions[1] =~? '^'.a:action && a:0 == 1
     if a:0 == 1
       " Disable plugin:
       call pathogen#disable_plugin(a:1)
     else
       echom 'Too many arguments.'
     endif
-  elseif a:action ==? actions[2]
+  elseif actions[2] =~? '^'.a:action
     if a:0 == 0 || (a:0 == 1 && a:1 ==? 'all')
       " List all plugins:
       echom 'All plugins managed by pathogen:'
@@ -337,16 +338,16 @@ endfunction " }}}1
 
 " Provides completion for :Plugin
 function! s:Command_complete(ArgLead, CmdLine, CursorPos) " {{{1
-  if a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ \S*$'
+  if a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+[ ]\+\S*$'
     " Complete actions:
-    return join(['enable', 'disable', 'list'], "\n")
-  elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ e\S* \S*$'
+    return join(['enable ', 'disable ', 'list '], "\n")
+  elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ e\S*[ ]\+\S*$'
     " Complete enable action, list disabled plugins:
     return join(map(pathogen#list_plugins(-1), 'substitute(v:val, ''^.*''.pathogen#separator().''\(.\{-}\)$'',''\1'',"")'), "\n")
-  elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ d\S* \S*$'
+  elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ d\S*[ ]\+\S*$'
     " Complete disable action, list enabled plugins:
     return join(map(pathogen#list_plugins(1), 'substitute(v:val, ''^.*''.pathogen#separator().''\(.\{-}\)$'',''\1'',"")'), "\n")
-  elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ l\S* \S*$'
+  elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ l\S*[ ]\+\S*$'
     " Complete list action, list options:
     return join(['all', 'enabled', 'disabled'], "\n")
   endif
