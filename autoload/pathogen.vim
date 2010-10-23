@@ -301,7 +301,7 @@ endfunction " }}}1
 
 " :Plugin complement:
 function! s:plugin(action, ...) " {{{1
-  let actions = ['enable', 'disable', 'list']
+  let actions = ['enable', 'disable', 'list', 'install', 'remove']
   "if  index(actions, a:action, 0, 1) == -1
   if len(filter(copy(actions), 'v:val =~? ''^''.a:action')) == 0
     echom 'Action not supported.'
@@ -342,10 +342,27 @@ function! s:plugin(action, ...) " {{{1
     for p in list
       echom p
     endfor
+  elseif actions[3] =~? '^'.a:action
+    call s:call_vam('install', a:000)
+  elseif actions[4] =~? '^'.a:action
+    call s:call_vam('remove', a:000)
   else
     echom 'Action not supported: ' . a:action
   endif
 endfunction " }}}1
+
+" Use Vim Addon Manager.
+function! s:call_vam(action, list)
+  try
+    if a:action == 'install'
+      call scriptmanager#Activate(a:list)
+    else
+      call scriptmanager2#UninstallAddons(a:list)
+    endif
+  catch
+    echom v:exception
+  endtry
+endfunction
 
 " Format output for :Plugin list.
 function! s:plugin_list(opt) " {{{1
@@ -360,7 +377,7 @@ endfunction " }}}1
 function! s:Command_complete(ArgLead, CmdLine, CursorPos) " {{{1
   if a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+[ ]\+\S*$'
     " Complete actions:
-    return join(['enable ', 'disable ', 'list '], "\n")
+    return join(['enable ', 'disable ', 'list ', 'install ', 'remove '], "\n")
   elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ e\S*[ ]\+\S*$'
     " Complete enable action, list disabled plugins:
     return join(map(pathogen#list_plugins(-1), 'substitute(v:val, ''^.*''.pathogen#separator().''\(.\{-}\)$'',''\1'',"")'), "\n")
@@ -370,6 +387,10 @@ function! s:Command_complete(ArgLead, CmdLine, CursorPos) " {{{1
   elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ l\S*[ ]\+\S*$'
     " Complete list action, list options:
     return join(['all', 'enabled', 'disabled'], "\n")
+  elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ i\S*[ ]\+\S*$'
+    return join(scriptmanager2#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos, 'installable'), "\n")
+  elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ r\S*[ ]\+\S*$'
+    return join(scriptmanager2#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos, 'uninstall'), "\n")
   endif
 endfunction " }}}1
 
