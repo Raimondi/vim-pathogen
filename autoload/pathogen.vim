@@ -343,9 +343,9 @@ function! s:plugin(action, ...) " {{{1
       echom p
     endfor
   elseif actions[3] =~? '^'.a:action
-    call s:call_vam('install', a:000)
+    call s:call_vam('install', copy(a:000))
   elseif actions[4] =~? '^'.a:action
-    call s:call_vam('remove', a:000)
+    call s:call_vam('remove', copy(a:000))
   else
     echom 'Action not supported: ' . a:action
   endif
@@ -390,7 +390,7 @@ function! s:Command_complete(ArgLead, CmdLine, CursorPos) " {{{1
   elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ i\S*[ ]\+\S*$'
     return join(scriptmanager2#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos, 'installable'), "\n")
   elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ r\S*[ ]\+\S*$'
-    return join(scriptmanager2#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos, 'uninstall'), "\n")
+    return join(scriptmanager2#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos), "\n")
   endif
 endfunction " }}}1
 
