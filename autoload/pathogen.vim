@@ -173,7 +173,9 @@ function! pathogen#enable_plugin(plugin) " {{{1
   if idx != -1
     call remove(s:pathogen_disabled, idx)
     call pathogen#save_bundled_plugin_file()
+    return 1
   endif
+  return 0
 endfunction " }}}1
 
 function! pathogen#disable_plugin(plugin) " {{{1
@@ -181,7 +183,9 @@ function! pathogen#disable_plugin(plugin) " {{{1
   if index(s:pathogen_disabled, plugin) == -1
     call add(s:pathogen_disabled, plugin)
     call pathogen#save_bundled_plugin_file()
+    return 1
   endif
+  return 0
 endfunction " }}}1
 
 " Prepend all subdirectories of path to the rtp, and append all after
@@ -302,7 +306,6 @@ endfunction " }}}1
 " :Plugin complement:
 function! s:plugin(action, ...) " {{{1
   let actions = ['enable', 'disable', 'list', 'install', 'remove']
-  "if  index(actions, a:action, 0, 1) == -1
   if len(filter(copy(actions), 'v:val =~? ''^''.a:action')) == 0
     echom 'Action not supported.'
     return ''
@@ -311,14 +314,24 @@ function! s:plugin(action, ...) " {{{1
   if actions[0] =~? '^'.a:action
     if a:0 == 1
       " Enable plugin:
-      call pathogen#enable_plugin(a:1)
+      if pathogen#enable_plugin(a:1)
+        echom 'Pathogen: The plug-in "'.a:1.'" was enabled.'
+        call pathogen#helptags()
+      else
+        echom 'Pathogen: The plug-in "'.a:1.'" could not be enabled, it might be already enabled or not installed.'
+      endif
     else
       echom 'Too many arguments.'
     endif
   elseif actions[1] =~? '^'.a:action && a:0 == 1
     if a:0 == 1
       " Disable plugin:
-      call pathogen#disable_plugin(a:1)
+      if pathogen#disable_plugin(a:1)
+        echom 'Pathogen: The plug-in "'.a:1.'" was disabled.'
+        call pathogen#helptags()
+      else
+        echom 'Pathogen: The plug-in "'.a:1.'" could not be disabled, it might be already disabled or not installed.'
+      endif
     else
       echom 'Too many arguments.'
     endif
@@ -359,8 +372,15 @@ function! s:call_vam(action, list)
     else
       call scriptmanager2#UninstallAddons(a:list)
     endif
+    call pathogen#helptags()
+  catch /^Vim\%((\a\+)\)\=:E117/
+    echohl WarningMsg
+    echom 'Pathogen: The plug-in "Vim Addon Manager" must be installed in order to use the "'.a:action.'" action.'
+    echohl None
   catch
-    echom v:exception
+    echohl ErrorMsg
+    echom 'Pathogen: '.substitute(v:exception, '^Vim\%((\a\+)\):', '', '')
+    echohl None
   endtry
 endfunction
 
@@ -388,9 +408,25 @@ function! s:Command_complete(ArgLead, CmdLine, CursorPos) " {{{1
     " Complete list action, list options:
     return join(['all', 'enabled', 'disabled'], "\n")
   elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ i\S*[ ]\+\S*$'
-    return join(scriptmanager2#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos, 'installable'), "\n")
+    try
+      let result = join(scriptmanager2#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos, 'installable'), "\n")
+      return result
+    catch /^Vim\%((\a\+)\)\=:E117/
+      echohl WarningMsg
+      echom 'Pathogen: The plug-in "Vim Addon Manager" must be installed in order to use the install/remove actions.'
+      echohl None
+      return ''
+    endtry
   elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ r\S*[ ]\+\S*$'
-    return join(scriptmanager2#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos), "\n")
+    try
+      let result = join(scriptmanager2#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos), "\n")
+      return result
+    catch /^Vim\%((\a\+)\)\=:E117/
+      echohl WarningMsg
+      echom 'Pathogen: The plug-in "Vim Addon Manager" must be installed in order to use the install/remove actions.'
+      echohl None
+      return ''
+    endtry
   endif
 endfunction " }}}1
 
