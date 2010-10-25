@@ -57,36 +57,30 @@ Everything in pathogen is controlled through the Plugin command. Using a
 familiar cascading command style (ala subversion or git), the Plugin command
 has the following subcommands:
 
+                                                               *pathogen-list*
+:Plugin list [all|enabled|disabled] ~
+
+The "list" subcommand allows to see the status of the plugins being handled.
+
                                                            *pathogen-list-all*
-:Plugin list / list all ~
+  :Plugin list [all] ~
 
 This shows a nicely formatted list of all plugins currently installed in Vim.
 The enabled plugins have a leading '+' character, whereas a leading '-'
 character is used to show that a plugin is currently disabled.
 
                                                        *pathogen-list-enabled*
-:Plugin list enabled~
+  :Plugin list enabled~
 
 This will list all of the enabled plugins current installed in Vim. To disable
 a plugin, use the |pathogen-disable| command.
 
                                                       *pathogen-list-disabled*
-:Plugin list disabled~
+  :Plugin list disabled~
 
 This will list all of the disabled plugins current installed in Vim. To enable
 a plugin, use the |pathogen-enable| command.
 
-                                                            *pathogen-install*
-:Plugin install <plugin>~
->
-This will use the vim-addon-manager to install the named plugin (here, the
-great TagList plugin). You will need to have vim-addon-manager installed to
-use this feature. See |pathogen-vam| for more details.
-
-example:
->
-    :Plugin install TagList
-<
                                                              *pathogen-enable*
 :Plugin enable <plugin>~
 >
@@ -110,6 +104,17 @@ session or start a new one to see the effect.
 example:
 >
     :Plugin disable TagList
+<
+                                                            *pathogen-install*
+:Plugin install <plugin>~
+>
+This will use the vim-addon-manager to install the named plugin (here, the
+great TagList plugin). You will need to have vim-addon-manager installed to
+use this feature. See |pathogen-vam| for more details.
+
+example:
+>
+    :Plugin install TagList
 <
                                                              *pathogen-remove*
 :Plugin remove <plugin>~
