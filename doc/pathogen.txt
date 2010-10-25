@@ -43,7 +43,7 @@ Installing a plugin is then a simple matter of copying the plugin to its own
 subdirectory beneath the bundle directory. Removing plugins is as easy as
 removing that subdirectory. Because the plugins are isolated within their own
 subdirectories, upgrading becomes a simple matter of removing the old and
-installing the new, NOTE modulo some attention to possibly persistent user-data
+installing the new, modulo some attention to possibly persistent user-data
 that some plugins rely on.
 
 
