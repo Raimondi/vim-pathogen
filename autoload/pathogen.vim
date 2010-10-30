@@ -247,10 +247,8 @@ function! pathogen#runtime_append_all_bundles(...) " {{{1
   endfor
   call filter(list , ' !pathogen#is_disabled_plugin(v:val)') " remove disabled plugin directories from the list
   let &rtp = pathogen#join(pathogen#uniq(list))
-  " Create bundled_plugin file if necessary.
-  if glob(g:bundled_plugin) == ''
-    call pathogen#save_bundled_plugin_file()
-  endif
+  " Create or update bundled_plugin file.
+  call pathogen#save_bundled_plugin_file()
   return 1
 endfunction " }}}1
 
