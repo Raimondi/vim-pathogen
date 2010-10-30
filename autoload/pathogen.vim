@@ -310,28 +310,32 @@ function! s:plugin(action, ...) " {{{1
   endif
 
   if actions[0] =~? '^'.a:action
-    if a:0 == 1
-      " Enable plugin:
-      if pathogen#enable_plugin(a:1)
-        echom 'Pathogen: The plug-in "'.a:1.'" was enabled.'
-        call pathogen#helptags()
-      else
-        echom 'Pathogen: The plug-in "'.a:1.'" could not be enabled, it might be already enabled or not installed.'
-      endif
+    if a:0 > 0
+      " Enable plugins:
+      for i in a:000
+        if pathogen#enable_plugin(i)
+          echom 'Pathogen: The plug-in "'.i.'" was enabled.'
+          call pathogen#helptags()
+        else
+          echom 'Pathogen: The plug-in "'.i.'" could not be enabled, it might be already enabled or not installed.'
+        endif
+      endfor
     else
-      echom 'Too many arguments.'
+      echom 'You must provide one or more plugin names.'
     endif
-  elseif actions[1] =~? '^'.a:action && a:0 == 1
-    if a:0 == 1
-      " Disable plugin:
-      if pathogen#disable_plugin(a:1)
-        echom 'Pathogen: The plug-in "'.a:1.'" was disabled.'
-        call pathogen#helptags()
-      else
-        echom 'Pathogen: The plug-in "'.a:1.'" could not be disabled, it might be already disabled or not installed.'
-      endif
+  elseif actions[1] =~? '^'.a:action
+    if a:0 > 0
+      " Disable plugins:
+      for i in a:000
+        if pathogen#disable_plugin(i)
+          echom 'Pathogen: The plug-in "'.i.'" was disabled.'
+          call pathogen#helptags()
+        else
+          echom 'Pathogen: The plug-in "'.i.'" could not be disabled, it might either be already disabled or not installed.'
+        endif
+      endfor
     else
-      echom 'Too many arguments.'
+      echom 'You must provide one or more plugin names.'
     endif
   elseif actions[2] =~? '^'.a:action
     if a:0 == 0 || (a:0 == 1 && a:1 ==? 'all')
@@ -347,7 +351,7 @@ function! s:plugin(action, ...) " {{{1
       echom 'Disabled plugins managed by pathogen:'
       let list = s:plugin_list(-1)
     else
-      echom 'Too many arguments.'
+      echom 'Wrong arguments. Use :Plugin list [all|enabled|disabled]'
       return ''
     endif
     for p in list
