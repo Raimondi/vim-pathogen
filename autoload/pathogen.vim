@@ -363,7 +363,7 @@ function! s:plugin(action, ...) " {{{1
 endfunction " }}}1
 
 " Use Vim Addon Manager.
-function! s:call_vam(action, list)
+function! s:call_vam(action, list) "{{{1
   try
     if a:action == 'install'
       call scriptmanager#Activate(a:list)
@@ -380,7 +380,7 @@ function! s:call_vam(action, list)
     echom 'Pathogen: '.substitute(v:exception, '^Vim\%((\a\+)\):', '', '')
     echohl None
   endtry
-endfunction
+endfunction " }}}1
 
 " Format output for :Plugin list.
 function! s:plugin_list(opt) " {{{1
