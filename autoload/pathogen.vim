@@ -409,26 +409,22 @@ function! s:Command_complete(ArgLead, CmdLine, CursorPos) " {{{1
   elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ l\S*[ ]\+\S*$'
     " Complete list action, list options:
     return join(['all', 'enabled', 'disabled'], "\n")
-  elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ i\S*[ ]\+\S*$'
+  elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ [ir]\S*\([ ]\+\S\+\)*[ ]\+\S*$'
     try
-      let result = join(scriptmanager2#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos, 'installable'), "\n")
-      return result
+      " Get list of available plugins to install or remove:
+      let result = match(a:CmdLine[: a:CursorPos ],
+            \ '\m\(^\s*\||\s*\)\S\+ i\S*\([ ]\+\S\+\)*[ ]\+\S*$' ) > -1 ?
+            \ scriptmanager2#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos, 'installable') :
+            \ scriptmanager2#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos)
+      return join(result, "\n")
     catch /^Vim\%((\a\+)\)\=:E117/
       echohl WarningMsg
       echom 'Pathogen: The plug-in "Vim Addon Manager" must be installed in order to use the install/remove actions.'
       echohl None
       return ''
     endtry
-  elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ r\S*[ ]\+\S*$'
-    try
-      let result = join(scriptmanager2#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos), "\n")
-      return result
-    catch /^Vim\%((\a\+)\)\=:E117/
-      echohl WarningMsg
-      echom 'Pathogen: The plug-in "Vim Addon Manager" must be installed in order to use the install/remove actions.'
-      echohl None
-      return ''
-    endtry
+  else
+    return ''
   endif
 endfunction " }}}1
 
