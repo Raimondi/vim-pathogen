@@ -184,12 +184,22 @@ function! pathogen#disable_plugin(plugin) " {{{1
   endif
 endfunction " }}}1
 
-" Prepend all subdirectories of path to the rtp, and append all after
+" Checks if a bundle is 'disabled'. A bundle is considered 'disabled' if
+" its 'basename()' is included in g:pathogen_disabled[]'.
+function! pathogen#is_disabled(path) " {{{1
+  if !exists("g:pathogen_disabled")
+    return 0
+  endif
+  let sep = pathogen#separator()
+  return index(g:pathogen_disabled, strpart(a:path, strridx(a:path, sep)+1)) != -1
+endfunction "}}}1
+
+" Prepend all subdirectories of path to the rtp, and append all 'after'
 " directories in those subdirectories.
 function! pathogen#runtime_prepend_subdirectories(path) " {{{1
   let sep    = pathogen#separator()
-  let before = pathogen#glob_directories(a:path.sep."*[^~]")
-  let after  = pathogen#glob_directories(a:path.sep."*[^~]".sep."after")
+  let before = filter(pathogen#glob_directories(a:path.sep."*[^~]"), '!pathogen#is_disabled(v:val)')
+  let after  = filter(pathogen#glob_directories(a:path.sep."*[^~]".sep."after"), '!pathogen#is_disabled(v:val)')
   let rtp = pathogen#split(&rtp)
   let path = expand(a:path)
   call filter(rtp,'v:val[0:strlen(path)-1] !=# path')
