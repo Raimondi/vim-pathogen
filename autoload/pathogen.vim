@@ -377,7 +377,7 @@ function! s:call_vam(action, list) "{{{1
     call pathogen#helptags()
   catch /^Vim\%((\a\+)\)\=:E117/
     echohl WarningMsg
-    echom 'Pathogen: The plug-in "Vim Addon Manager" must be installed in order to use the "'.a:action.'" action.'
+    echom 'Pathogen: The plugin "Vim Addon Manager" must be installed in order to use the "'.a:action.'" action.'
     echohl None
   catch
     echohl ErrorMsg
@@ -446,7 +446,7 @@ function! s:Command_complete(ArgLead, CmdLine, CursorPos) " {{{1
       return join(result, "\n")
     catch /^Vim\%((\a\+)\)\=:E117/
       echohl WarningMsg
-      echom 'Pathogen: The plug-in "Vim Addon Manager" must be installed in order to use the install/remove actions.'
+      echom 'Pathogen: The plugin "Vim Addon Manager" must be installed in order to use the install/remove actions.'
       echohl None
       return ''
     endtry
