@@ -370,7 +370,7 @@ endfunction " }}}1
 function! s:call_vam(action, list) "{{{1
   try
     if a:action == 'install'
-      call scriptmanager#Activate(a:list)
+      call s:install_recursively(a:list)
     else
       call scriptmanager2#UninstallAddons(a:list)
     endif
@@ -385,6 +385,27 @@ function! s:call_vam(action, list) "{{{1
     echohl None
   endtry
 endfunction " }}}1
+
+" Install files and its dependencies
+function! s:install_recursively(list)
+  let installed = []
+
+  for name in a:list
+    if index(installed, name) == -1
+      " Don't try to install twice
+      call add(installed, name)
+      let infoFile = scriptmanager#AddonInfoFile(name)
+      if !filereadable(infoFile) && !scriptmanager#IsPluginInstalled(name)
+        call scriptmanager2#Install([name])
+      endif
+      let info = scriptmanager#AddonInfo(name)
+      let dependencies = get(info,'dependencies', {})
+
+      " Install dependencies
+      call s:install_recursively(keys(dependencies))
+    endif
+  endfor
+endf
 
 " Format output for :Plugin list.
 function! s:plugin_list(opt) " {{{1
