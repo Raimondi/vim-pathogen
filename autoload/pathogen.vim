@@ -309,35 +309,35 @@ function! s:plugin(action, ...) " {{{1
     return ''
   endif
 
-  if actions[0] =~? '^'.a:action
+  if a:action =~? '^e\%[nable]'
     if a:0 > 0
       " Enable plugins:
       for i in a:000
         if pathogen#enable_plugin(i)
-          echom 'Pathogen: The plug-in "'.i.'" was enabled.'
+          echom 'Pathogen: The plugin "'.i.'" was enabled.'
           call pathogen#helptags()
         else
-          echom 'Pathogen: The plug-in "'.i.'" could not be enabled, it might be already enabled or not installed.'
+          echom 'Pathogen: The plugin "'.i.'" could not be enabled, it might be already enabled or not installed.'
         endif
       endfor
     else
       echom 'You must provide one or more plugin names.'
     endif
-  elseif actions[1] =~? '^'.a:action
+  elseif a:action =~? '^d\%[isable]'
     if a:0 > 0
-      " Disable plugins:
+      " Disable plugins:'
       for i in a:000
         if pathogen#disable_plugin(i)
-          echom 'Pathogen: The plug-in "'.i.'" was disabled.'
+          echom 'Pathogen: The plugin "'.i.'" was disabled.'
           call pathogen#helptags()
         else
-          echom 'Pathogen: The plug-in "'.i.'" could not be disabled, it might either be already disabled or not installed.'
+          echom 'Pathogen: The plugin "'.i.'" could not be disabled, it might either be already disabled or not installed.'
         endif
       endfor
     else
       echom 'You must provide one or more plugin names.'
     endif
-  elseif actions[2] =~? '^'.a:action
+  elseif a:action =~? '^l\%[ist]'
     if a:0 == 0 || (a:0 == 1 && a:1 ==? 'all')
       " List all plugins:
       echom 'All plugins managed by pathogen:'
@@ -357,9 +357,9 @@ function! s:plugin(action, ...) " {{{1
     for p in list
       echom p
     endfor
-  elseif actions[3] =~? '^'.a:action
+  elseif a:action =~? '^i\%[nstall]'
     call s:call_vam('install', copy(a:000))
-  elseif actions[4] =~? '^'.a:action
+  elseif a:action =~? '^r\%[emove]'
     call s:call_vam('remove', copy(a:000))
   else
     echom 'Action not supported: ' . a:action
@@ -390,15 +390,15 @@ endfunction " }}}1
 function! s:install_recursively(list)
   let installed = []
 
-  for name in a:list
-    if index(installed, name) == -1
-      " Don't try to install twice
-      call add(installed, name)
-      let infoFile = scriptmanager#AddonInfoFile(name)
-      if !filereadable(infoFile) && !scriptmanager#IsPluginInstalled(name)
-        call scriptmanager2#Install([name])
+  for plugin in a:list
+    if index(installed, plugin) == -1
+      " Don't try to install dependencies again
+      call add(installed, plugin)
+      let infoFile = scriptmanager#AddonInfoFile(plugin)
+      if !filereadable(infoFile) && !scriptmanager#IsPluginInstalled(plugin)
+        call scriptmanager2#Install([plugin])
       endif
-      let info = scriptmanager#AddonInfo(name)
+      let info = scriptmanager#AddonInfo(plugin)
       let dependencies = get(info,'dependencies', {})
 
       " Install dependencies
@@ -421,21 +421,27 @@ function! s:Command_complete(ArgLead, CmdLine, CursorPos) " {{{1
   if a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+[ ]\+\S*$'
     " Complete actions:
     return join(['enable ', 'disable ', 'list ', 'install ', 'remove '], "\n")
-  elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ e\S*\([ ]\+\S\+\)*[ ]\+\S*$'
+  elseif a:CmdLine[: a:CursorPos ] =~?
+        \'\m\(^\s*\||\s*\)\S\+ e\%[nable]\([ ]\+\S\+\)*[ ]\+\S*$'
     " Complete enable action, list disabled plugins:
     return join(map(pathogen#list_plugins(-1), 'substitute(v:val, ''^.*''.pathogen#separator().''\(.\{-}\)$'',''\1'',"")'), "\n")
-  elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ d\S*\([ ]\+\S\+\)*[ ]\+\S*$'
+  elseif a:CmdLine[: a:CursorPos ] =~?
+        \'\m\(^\s*\||\s*\)\S\+ d\%[isable]\([ ]\+\S\+\)*[ ]\+\S*$'
     " Complete disable action, list enabled plugins:
     return join(map(pathogen#list_plugins(1), 'substitute(v:val, ''^.*''.pathogen#separator().''\(.\{-}\)$'',''\1'',"")'), "\n")
-  elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ l\S*[ ]\+\S*$'
+  elseif a:CmdLine[: a:CursorPos ] =~?
+        \'\m\(^\s*\||\s*\)\S\+ l\%[ist][ ]\+\S*$'
     " Complete list action, list options:
     return join(['all', 'enabled', 'disabled'], "\n")
-  elseif a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+ [ir]\S*\([ ]\+\S\+\)*[ ]\+\S*$'
+  elseif a:CmdLine[: a:CursorPos ] =~?
+        \'\m\(^\s*\||\s*\)\S\+ \(i\%[nstall]\|r\%[emove]\)\([ ]\+\S\+\)*[ ]\+\S*$'
     try
       " Get list of available plugins to install or remove:
       let result = match(a:CmdLine[: a:CursorPos ],
-            \ '\m\(^\s*\||\s*\)\S\+ i\S*\([ ]\+\S\+\)*[ ]\+\S*$' ) > -1 ?
-            \ scriptmanager2#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos, 'installable') :
+            \ '\m\(^\s*\||\s*\)\S\+ i\%[nstall]\([ ]\+\S\+\)*[ ]\+\S*$' ) > -1
+            \ ?
+            \ scriptmanager2#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos, 'installable')
+            \ :
             \ scriptmanager2#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos)
       return join(result, "\n")
     catch /^Vim\%((\a\+)\)\=:E117/
