@@ -279,6 +279,17 @@ function! pathogen#helptags() " {{{1
   endfor
 endfunction " }}}1
 
+" Single point of call from user-land. Removes the need to do the 'filetype'
+" dance in ~/.vimrc
+" Stolen from Araxia's fork of pathogen :-)
+function! pathogen#infect()
+  let l:filetype_was_on = exists('g:did_load_filetypes')
+  filetype off
+  call pathogen#runtime_append_all_bundles()
+  call pathogen#helptags()
+  if l:filetype_was_on | filetype on | endif
+endfunction
+
 " :Plugin complement:
 function! s:plugin(action, ...) " {{{1
   let actions = ['enable', 'disable', 'list']
