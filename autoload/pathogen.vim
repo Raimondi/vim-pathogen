@@ -204,7 +204,7 @@ endfunction " }}}1
 " be used.
 function! pathogen#runtime_append_all_bundles(...) " {{{1
   let sep = pathogen#separator()
-  let names = a:0 ? a:000 : [ 'bundle' ]
+  let names = a:0 ? a:000[0] : [ 'bundle' ]
   let list = []
   call pathogen#parse_bundled_plugins_files()
   for name in names
@@ -282,13 +282,14 @@ endfunction " }}}1
 " Single point of call from user-land. Removes the need to do the 'filetype'
 " dance in ~/.vimrc
 " Stolen from Araxia's fork of pathogen :-)
-function! pathogen#infect()
+function! pathogen#infect(...) " {{{1
+  let names = a:0 ? a:000[0] : [ 'bundle' ]
   let l:filetype_was_on = exists('g:did_load_filetypes')
   filetype off
-  call pathogen#runtime_append_all_bundles()
+  call pathogen#runtime_append_all_bundles(names)
   call pathogen#helptags()
   if l:filetype_was_on | filetype on | endif
-endfunction
+endfunction " }}}1
 
 " :Plugin complement:
 function! s:plugin(action, ...) " {{{1
