@@ -384,7 +384,7 @@ function! s:call_vam(action, list) "{{{1
     if a:action == 'install'
       call s:install_recursively(a:list)
     else
-      call scriptmanager2#UninstallAddons(a:list)
+      call vam#install#UninstallAddons(a:list)
     endif
     call pathogen#helptags()
   catch /^Vim\%((\a\+)\)\=:E117/
@@ -406,11 +406,11 @@ function! s:install_recursively(list)
     if index(installed, plugin) == -1
       " Don't try to install dependencies again
       call add(installed, plugin)
-      let infoFile = scriptmanager#AddonInfoFile(plugin)
-      if !filereadable(infoFile) && !scriptmanager#IsPluginInstalled(plugin)
-        call scriptmanager2#Install([plugin])
+      let infoFile = vam#AddonInfoFile(plugin)
+      if !filereadable(infoFile) && !vam#IsPluginInstalled(plugin)
+        call vam#install#Install([plugin])
       endif
-      let info = scriptmanager#AddonInfo(plugin)
+      let info = vam#AddonInfo(plugin)
       let dependencies = get(info,'dependencies', {})
 
       " Install dependencies
@@ -429,7 +429,7 @@ endfunction " }}}1
 
 
 " Provides completion for :Plugin
-function! s:Command_complete(ArgLead, CmdLine, CursorPos) " {{{1
+function! s:command_complete(ArgLead, CmdLine, CursorPos) " {{{1
   if a:CmdLine[: a:CursorPos ] =~? '\m\(^\s*\||\s*\)\S\+[ ]\+\S*$'
     " Complete actions:
     return join(['enable ', 'disable ', 'list ', 'install ', 'remove '], "\n")
@@ -452,9 +452,9 @@ function! s:Command_complete(ArgLead, CmdLine, CursorPos) " {{{1
       let result = match(a:CmdLine[: a:CursorPos ],
             \ '\m\(^\s*\||\s*\)\S\+ i\%[nstall]\([ ]\+\S\+\)*[ ]\+\S*$' ) > -1
             \ ?
-            \ scriptmanager2#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos, 'installable')
+            \ vam#install#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos, 'installable')
             \ :
-            \ scriptmanager2#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos)
+            \ vam#install#DoCompletion(a:ArgLead, a:CmdLine, a:CursorPos)
       return join(result, "\n")
     catch /^Vim\%((\a\+)\)\=:E117/
       echohl WarningMsg
@@ -470,6 +470,6 @@ endfunction " }}}1
 
 " Use:
 " :Plugin action [argument]
-command! -bar -nargs=+ -complete=custom,<SID>Command_complete Plugin call <SID>plugin(<f-args>)
+command! -bar -nargs=+ -complete=custom,<SID>command_complete Plugin call <SID>plugin(<f-args>)
 
 " vim:set ft=vim ts=8 sw=2 sts=2:
