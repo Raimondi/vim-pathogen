@@ -270,21 +270,30 @@ function! pathogen#runtime_append_all_bundles(...) " {{{1
   let list = []
   call pathogen#parse_bundled_plugins_files()
   " Set runtimepath.
+  let dict = {}
+  let rtp = pathogen#split(&rtp)
+  for path in rtp
+    let dict[path] = []
+  endfor
   for name in names
     if index(s:done_bundles, name) >= 0
-      "return ""
       continue
     endif
     let s:done_bundles += [name]
-    for dir in pathogen#split(&rtp)
-      if dir =~# '\<after$'
-        echom 'rtp + '.dir
-        let list +=  pathogen#glob_directories(substitute(dir,'after$',name,'').sep.'*[^~]'.sep.'after') + [dir]
+    for path in keys(dict)
+      if path =~# '\<after$'
+        let dict[path] +=  pathogen#glob_directories(substitute(path,'after$',name,'').sep.'*[^~]'.sep.'after')
       else
-        echom dir . ' + rtp'
-        let list +=  [dir] + pathogen#glob_directories(dir.sep.name.sep.'*[^~]')
+        let dict[path] +=  pathogen#glob_directories(path.sep.name.sep.'*[^~]')
       endif
     endfor
+  endfor
+  for path in rtp
+    if path =~# '\<after$'
+      let list +=  [path] + dict[path]
+    else
+      let list +=  dict[path]+ [path]
+    endif
   endfor
   call filter(list , ' !pathogen#is_disabled_plugin(v:val)') " remove disabled plugin directories from the list
   let &rtp = pathogen#join(pathogen#uniq(list))
