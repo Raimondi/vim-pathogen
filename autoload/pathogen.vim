@@ -32,7 +32,7 @@ if !exists('g:bundled_plugin')
   let g:bundled_plugin = fnameescape(expand(s:platform_vimfiles . '/bundled_plugins'))
 endif
 
-let s:done_bundles = ''
+let s:done_bundles = []
 
 " Point of entry for basic default usage.  Give a directory name to invoke
 " pathogen#runtime_append_all_bundles() (defaults to "bundle"), or a full path
@@ -271,11 +271,11 @@ function! pathogen#runtime_append_all_bundles(...) " {{{1
   call pathogen#parse_bundled_plugins_files()
   " Set runtimepath.
   for name in names
-    if "\n".s:done_bundles =~# "\\M\n".name."\n"
+    if index(s:done_bundles, name) >= 0
       "return ""
       continue
     endif
-    let s:done_bundles .= name . "\n"
+    let s:done_bundles += [name]
     for dir in pathogen#split(&rtp)
       if dir =~# '\<after$'
         echom 'rtp + '.dir
@@ -301,7 +301,7 @@ endfunction " }}}1
 function! pathogen#list_plugins(arg) " {{{1
   let sep = pathogen#separator()
   let list = []
-  for name in split(s:done_bundles,"\n")
+  for name in s:done_bundles
     for dir in pathogen#split(&rtp)
       if dir !~# '\<after$'
         let list +=  pathogen#glob_directories(dir.sep.name.sep.'*[^~]')
@@ -322,7 +322,7 @@ endfunction " }}}1
 
 " Returns a list of all "bundle" dirs.
 function! pathogen#list_bundle_dirs() " {{{1
-  return split(s:done_bundles,"\n")
+  return s:done_bundles
 endfunction " }}}1
 
 " Check if plugin is disabled of not
