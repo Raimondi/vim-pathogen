@@ -269,25 +269,6 @@ function! pathogen#runtime_append_all_bundles(...) " {{{1
   let l:names = a:0 ? (type(a:000[0]) == 3 ? a:000[0] : a:000) : [ 'bundle' ]
   let list = []
   call pathogen#parse_bundled_plugins_files()
-  " Set default installation directory.
-  if !exists('g:vim_script_manager')
-    let g:vim_script_manager = {}
-  endif
-  if !exists('g:vim_script_manager[''plugin_root_dir'']')
-    let l:break = 0
-    for name in names
-      for dir in pathogen#split(&rtp)
-        let g:vim_script_manager['plugin_root_dir'] = join(pathogen#glob_directories(dir.sep.name))
-        if g:vim_script_manager['plugin_root_dir'] != ''
-          let l:break = 1
-          break
-        endif
-      endfor
-      if l:break
-        break
-      endif
-    endfor
-  endif
   " Set runtimepath.
   for name in names
     if "\n".s:done_bundles =~# "\\M\n".name."\n"
