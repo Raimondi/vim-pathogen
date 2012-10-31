@@ -2,8 +2,8 @@ let b:disabled = []
 let b:enabled = []
 
 function! BiscuitStamp(script)
-  " enable all plugins
-  %s/^-/ /e
+  " enable all non-pinned plugins
+  %s/^\s*-\s*/ /e
   " disable & test
   exe b:disabled[0] . ',' . b:disabled[1] . "s/^ /-/e"
   silent write

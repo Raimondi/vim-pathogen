@@ -1,13 +1,7 @@
-The bundled_plugins file will contain bundle subdirectories in the
-parent 'bundle' dir, as in:
+Biscuit:
 
-  bundle/local:
-    foo
-  bundle/shared:
-    bar
-  bundle:
-    local
-    shared
-    baz
+* two initial checks to confirm that the provided test fails with all (non-pinned) plugins enabled, and then passes with all disabled.
 
------------------------------------------------------------------------------
+* would be nice to not have to press enter when the vim subprocess errors (like missing colorscheme)
+
+* need a way to indicate that all bisections completed without locating failing plugin - while loop needs tweaking

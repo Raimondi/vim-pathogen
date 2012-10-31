@@ -318,10 +318,10 @@ function! pathogen#parse_bundled_plugins_files() " {{{2
       " collect this plugin in the extant bundle
       let plugin = tolower(line)
       let status = 1
-      if plugin =~ '^\s*-'
+      if plugin =~ '^\s*[=-]'
         let status = 0
       endif
-      let plugin = substitute(plugin, '^\s*-\?\s*', '', '')
+      let plugin = substitute(plugin, '^\s*[=+-]\?\s*', '', '')
       if status == 0
         call add(s:pathogen_disabled, plugin)
       endif
