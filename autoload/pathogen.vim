@@ -429,25 +429,6 @@ function! s:plugin(action, ...) " {{{1
   endif
 endfunction " }}}1
 
-" Biscuit Support {{{1
-" Vim Plugin Bisect tool to locate plugins failing a test
-function! pathogen#biscuit(testfile)
-  set nocompatible nomore
-
-  " TODO: replace this with bundle_parse
-  call pathogen#infect('bundle/local')
-
-  exe "source " . a:testfile
-
-  " whether we echo pass/fail or use quit/cquit is yet to be decided
-  if Biscuit() == 0
-    !echo "failed"
-  else
-    !echo "passed"
-  endif
-  quit
-endfunction
-
 " Use Vim Addon Manager.
 function! s:call_vam(action, list) "{{{1
   try
