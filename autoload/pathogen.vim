@@ -299,12 +299,14 @@ function! pathogen#parse_bundled_plugins_files() " {{{2
   " can have more than one, but most typically expected to be a single entry
   " as ~/.vim/bundled_plugins
   let bpfs = filter(map(pathogen#split(&rtp), 'findfile("bundled_plugins", v:val)'), 'len(v:val) != 0')
+  call map(bpfs, '{"path": fnamemodify(v:val, ":p"), "bundles": []}')
 
+  let s:bpfs = []
   let s:pathogen_disabled = []
   for bpf in bpfs
-    let bundled_plugins = readfile(bpf)
+    let bundled_plugins = readfile(bpf.path)
+    let bpf.writable = filewritable(bpf.path)
 
-    let bundle = ''
     for line in bundled_plugins
       " skip blank lines
       if line =~ '^\s*$'
@@ -312,23 +314,25 @@ function! pathogen#parse_bundled_plugins_files() " {{{2
       endif
       " capture paths as new bundles
       if line =~ ':\s*$'
-        let bundle = substitute(line, ':\s*$', '', '')
+        call add(bpf.bundles,
+              \{'name': substitute(line, ':\s*$', '', ''), 'plugins': []})
         continue
       endif
       " collect this plugin in the extant bundle
-      let plugin = tolower(line)
-      let status = 1
-      if plugin =~ '^\s*[=-]'
-        let status = 0
+      let plugin = {}
+      let plugin.name    = tolower(substitute(line, '^\s*[-+=]\s*', '', ''))
+      let plugin.enabled = line !~ '^\s*[-=]'
+      let plugin.pinned  = line =~ '^\s*[=+]'
+      if !plugin.enabled
+        call add(s:pathogen_disabled, plugin.name)
       endif
-      let plugin = substitute(plugin, '^\s*[=+-]\?\s*', '', '')
-      if status == 0
-        call add(s:pathogen_disabled, plugin)
-      endif
+      call add(bpf.bundles[-1].plugins, copy(plugin))
     endfor
+    call add(s:bpfs, bpf)
   endfor
 
   let s:pathogen_disabled = pathogen#uniq(s:pathogen_disabled)
+  return s:bpfs
 endfunction " }}}2
 
 function! pathogen#list_bundle_plugins(bnd) " {{{2
