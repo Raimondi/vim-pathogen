@@ -302,8 +302,9 @@ function! pathogen#parse_bundled_plugins_files() " {{{2
   call map(bpfs, '{"path": fnamemodify(v:val, ":p"), "bundles": []}')
 
   let s:bpfs = []
+  let s:pinned = []
   let s:pathogen_disabled = []
-  for bpf in bpfs
+  for bpf in reverse(bpfs)
     let bundled_plugins = readfile(bpf.path)
     let bpf.writable = filewritable(bpf.path)
 
@@ -320,17 +321,28 @@ function! pathogen#parse_bundled_plugins_files() " {{{2
       endif
       " collect this plugin in the extant bundle
       let plugin = {}
-      let plugin.name    = tolower(substitute(line, '^\s*[-+=]\s*', '', ''))
+      let plugin.name    = tolower(substitute(line, '^\s*[-+= ]\s*', '', ''))
       let plugin.enabled = line !~ '^\s*[-=]'
       let plugin.pinned  = line =~ '^\s*[=+]'
-      if !plugin.enabled
+      if plugin.enabled
+        " Remove it from the disabled list.
+        call filter(s:pathogen_disabled, 'v:val != plugin.name')
+      else
         call add(s:pathogen_disabled, plugin.name)
       endif
+      if plugin.pinned
+        call add(s:pinned, plugin.name)
+      else
+        " Remove it from the pinned list.
+        call filter(s:pinned, 'v:val != plugin.name')
+      endif
+      echom bpf.path . ':' . len(bpf.bundles)
       call add(bpf.bundles[-1].plugins, copy(plugin))
     endfor
     call add(s:bpfs, bpf)
   endfor
 
+  let s:pinned = pathogen#uniq(s:pinned)
   let s:pathogen_disabled = pathogen#uniq(s:pathogen_disabled)
   return s:bpfs
 endfunction " }}}2
@@ -351,14 +363,17 @@ function! pathogen#save_bundled_plugin_file() " {{{2
   for bnd in pathogen#list_bundle_dirs()
     call add(plugins, bnd . ':')
     for plg in pathogen#list_bundle_plugins(bnd)
-      let status = ' '
+      let is_pinned = pathogen#is_pinned_plugin(plg)
       if pathogen#is_disabled_plugin(plg)
-        let status = '-'
+        let status = is_pinned ? '=' : '-'
+      else
+        let status = is_pinned ? '+' : ' '
       endif
       call add(plugins, status . plg)
     endfor
   endfor
   "echo "Saving " . g:bundled_plugin
+  let g:saved_plugins = plugins
   if writefile(plugins, g:bundled_plugin) == -1
     echoe "Couldn't save " . g:bundled_plugin . " file!"
   endif
@@ -433,6 +448,14 @@ endfunction " }}}2
 " Returns a list of all "bundle" dirs.
 function! pathogen#list_bundle_dirs() " {{{2
   return s:done_bundles
+endfunction " }}}2
+
+" Check if plugin is pinned of not
+function! pathogen#is_pinned_plugin(path) " {{{2
+  let plugname = a:path =~# "after$"
+        \ ? fnamemodify(a:path, ":h:t")
+        \ : fnamemodify(a:path, ":t")
+  return count(s:pinned, tolower(plugname), 1)
 endfunction " }}}2
 
 " Check if plugin is disabled of not
