@@ -336,7 +336,6 @@ function! pathogen#parse_bundled_plugins_files() " {{{2
         " Remove it from the pinned list.
         call filter(s:pinned, 'v:val != plugin.name')
       endif
-      echom bpf.path . ':' . len(bpf.bundles)
       call add(bpf.bundles[-1].plugins, copy(plugin))
     endfor
     call add(s:bpfs, bpf)
