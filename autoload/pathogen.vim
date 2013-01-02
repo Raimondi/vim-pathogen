@@ -362,6 +362,11 @@ function! pathogen#infect(...) " {{{1
   call pathogen#runtime_append_all_bundles(l:names)
   call pathogen#helptags()
   if l:filetype_was_on | filetype on | endif
+  if $MYVIMRC == ''
+    return 'finish'
+  else
+    return ''
+  endif
 endfunction " }}}1
 
 " :Plugin complement:
